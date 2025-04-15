@@ -3,6 +3,7 @@ import spacy
 from spacy.pipeline import EntityRuler
 from spacy import displacy
 
+# Set up the Streamlit app page
 st.set_page_config(page_title="🍀 Notre Dame NER 🎓", layout="wide")
 
 # Theme styles
@@ -57,7 +58,7 @@ st.markdown("""
 st.markdown('<p class="title-text">🎓🍀 Notre Dame NER Explorer</p>', unsafe_allow_html=True)
 st.markdown('<p class="subheader">Made with love & leprechauns. Upload your own stories or customize with Irish spirit!</p>', unsafe_allow_html=True)
 
-# Session state initializing
+# Initialize session state (text and patterns)
 if "text_input" not in st.session_state:
     st.session_state.text_input = (
         "The University of Notre Dame is home to the Golden Dome and the Fighting Irish. "
@@ -69,14 +70,14 @@ if "pattern_input" not in st.session_state:
 { "label": "BEST SCHOOL IN THE WORLD", "pattern": "Notre Dame" }
 { "label": "MASCOT", "pattern": "Fighting Irish" }'''
 
-# Load model
+# Load spaCy English model
 @st.cache(allow_output_mutation=True)
 def load_model():
     return spacy.load("en_core_web_sm")
 
 nlp = load_model()
 
-# Text Input
+# User text input section
 st.markdown("### 🖋 Paste or Upload Your Text")
 uploaded_file = st.file_uploader("📂 Upload a .txt file", type=["txt"])
 if uploaded_file:
@@ -88,7 +89,7 @@ else:
         height=160
     )
 
-# Pattern input
+# Custom pattern input section
 st.markdown("### 🌳 Define Custom Entity Patterns")
 st.session_state.pattern_input = st.text_area(
     "📚 Enter patterns (one per line):",
@@ -101,6 +102,8 @@ run_ner = st.button("Run NER 🍀")
 
 if run_ner:
     text = st.session_state.text_input
+
+    # Safely evaluate the user's entity patterns
     try:
         patterns = [eval(line.strip()) for line in st.session_state.pattern_input.strip().split("\n") if line.strip()]
     except Exception:
@@ -108,14 +111,18 @@ if run_ner:
         patterns = []
 
     if text.strip() and patterns:
+        # Remove existing entity ruler if it’s already in the pipeline
         if "custom_ruler" in nlp.pipe_names:
             nlp.remove_pipe("custom_ruler")
+
+        # Add custom entity patterns via spaCy’s EntityRuler
         ruler = nlp.add_pipe("entity_ruler", before="ner", name="custom_ruler")
         ruler.add_patterns(patterns)
 
+        # Process the user input text
         doc = nlp(text)
 
-        # Recognized entities
+        # Display detected entities
         st.markdown("### 📜 Recognized Entities")
         if doc.ents:
             for ent in doc.ents:
@@ -130,7 +137,7 @@ if run_ner:
         else:
             st.info("No entities found. Try adjusting your text or patterns.")
 
-        # Entity visualizer
+        # Optional Visualizer
         st.markdown("### 📚 Visualizer")
         colors = {
             "ORG": "#b3dac5", "PERSON": "#ae9142", "GPE": "#0a843d",
