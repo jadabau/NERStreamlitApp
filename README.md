@@ -4,6 +4,8 @@ Welcome to the **Notre Dame NER Explorer**: a custom-built Named Entity Recognit
 
 This app allows users to upload or paste their own text, define custom NER patterns, and visually explore highlighted entities in real-time using spaCy’s `EntityRuler`. Whether you're working with stories, campus history, or just experimenting with language, this tool makes entity recognition both easy, educational, and efficient.
 
+View it here: https://ndnerexplorer.streamlit.app/
+
 ---
 
 ## Project Overview
